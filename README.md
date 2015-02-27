@@ -2,4 +2,4 @@
 
 Just edit your config.php and then run this command 
 
-# php whmbackup.php
+```php whmbackup.php```

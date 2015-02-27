@@ -33,7 +33,7 @@ $out = curl_exec($ch);
 $html->load($out);
 
 $tdshade1 = $html->find('tr.tdshade1');
-$tdshade2 = $html->find('tr.tdshade1');
+$tdshade2 = $html->find('tr.tdshade2');
 
 $users = array();
 

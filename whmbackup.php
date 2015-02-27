@@ -66,5 +66,5 @@ foreach($users as $user) {
 	curl_exec($ch);
 
   	// sleep
-	sleep 60;
+	sleep(60);
 }

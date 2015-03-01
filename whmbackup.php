@@ -46,6 +46,8 @@ foreach($tdshade2 as $item) {
 	$users[] = $a['user'];
 }
 
+sort($users);
+
 foreach($users as $user) {
 	echo "backup user $user \n";
 	

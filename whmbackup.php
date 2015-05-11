@@ -1,5 +1,7 @@
 <?php
 
+echo "Backup...\n";
+
 include "config.php";
 include "simple_html_dom.php";
 
@@ -13,8 +15,8 @@ $ch = curl_init();
 $url = $whmUrl."/login/";
 curl_setopt($ch, CURLOPT_URL, $url);
 curl_setopt($ch, CURLOPT_POST, 1);
-curl_setopt($ch, CURLOPT_POSTFIELDS, 'user='.$username.'&pass='.$password); 
-curl_setopt($ch, CURLOPT_COOKIEJAR, 'cookie.txt'); 
+curl_setopt($ch, CURLOPT_POSTFIELDS, 'user='.$username.'&pass='.$password);
+curl_setopt($ch, CURLOPT_COOKIEJAR, 'cookie.txt');
 curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
 curl_setopt($ch, CURLOPT_FOLLOWLOCATION, 1);
 curl_exec($ch);
@@ -38,35 +40,60 @@ $tdshade2 = $html->find('tr.tdshade2');
 $users = array();
 
 foreach($tdshade1 as $item) {
-	$a = $item->attr;
-	$users[] = $a['user'];
+        $a = $item->attr;
+        $users[] = $a['user'];
 }
 foreach($tdshade2 as $item) {
-	$a = $item->attr;
-	$users[] = $a['user'];
+        $a = $item->attr;
+        $users[] = $a['user'];
 }
 
 sort($users);
 
 foreach($users as $user) {
-	echo "backup user $user \n";
-	
-	// login ke cPanel user
-	$url = $whmUrl."/".$cpsess."/xfercpanel/".$user;
-	curl_setopt($ch, CURLOPT_FOLLOWLOCATION, 1);
-	curl_setopt($ch, CURLOPT_URL, $url);
-	curl_exec($ch);
-	
-	// get theme
-	$url = curl_getinfo($ch, CURLINFO_EFFECTIVE_URL);
-	$url = explode("/",$url);
-	$theme = $url[5];
-	
-	// backup
-	$url = "$cPanelUrl/$cpsess/frontend/$theme/backup/dofullbackup.html?dest=scp&server=$backupHost&user=$backupUser&pass=$backupPass&port=$backupPort&rdir=$backupPath&email=$backupMail&submit=Generate Backup";
-	curl_setopt($ch, CURLOPT_URL, $url);
-	curl_exec($ch);
+        echo "backup user $user \n";
 
-  	// sleep
-	sleep(60);
+        $i = 1;
+
+        // xfercpanel ke user
+        $url = $whmUrl."/xfercpanel";
+        curl_setopt($ch, CURLOPT_URL, $url);
+        curl_setopt($ch, CURLOPT_POST, 1);
+        curl_setopt($ch, CURLOPT_POSTFIELDS, 'token=/'.$cpsess.'&user='.$user);
+        curl_setopt($ch, CURLOPT_COOKIEJAR, 'cookie.txt');
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+        curl_setopt($ch, CURLOPT_FOLLOWLOCATION, 1);
+        $out = curl_exec($ch);
+        //file_put_contents($user.$i++,$out); // 1
+
+        // parsing url ke cPanel user
+        $html = new simple_html_dom();
+        $html->load($out);
+
+        $out = $html->find('meta[http-equiv=refresh]');
+        $out = $out[0]->attr;
+        $out = $out['content'];
+        $url = str_replace("2;URL=","",$out);
+
+        // login ke cPanel user
+        curl_setopt($ch, CURLOPT_URL, $url);
+        curl_setopt($ch, CURLOPT_FOLLOWLOCATION, 1);
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+        $out = curl_exec($ch);
+        //file_put_contents($user.$i++,$out); // 2
+
+        // get cpsess2 & theme
+        $url = curl_getinfo($ch, CURLINFO_EFFECTIVE_URL);
+        $url = explode("/",$url);
+        $cpsess2 = $url[3];
+        $theme = $url[5];
+
+        // backup
+        $url = "$cPanelUrl/$cpsess2/frontend/$theme/backup/dofullbackup.html?dest=scp&server=$backupHost&user=$backupUser&pass=$backupPass&port=$backupPort&rdir=$backupPath&email=$backupMail&submit=Generate Backup";
+        curl_setopt($ch, CURLOPT_URL, $url);
+        $out=curl_exec($ch);
+        //file_put_contents($user.$i++,$out); // 4
+
+        // sleep
+        sleep(60);
 }

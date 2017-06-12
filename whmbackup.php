@@ -21,15 +21,22 @@ curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
 curl_setopt($ch, CURLOPT_FOLLOWLOCATION, 1);
 curl_exec($ch);
 
+echo "1\n";
+
 // get cpsess
 $url = curl_getinfo($ch, CURLINFO_EFFECTIVE_URL);
 $url = explode("/",$url);
 $cpsess = $url[3];
 
+echo "2\n";
+print_r($url);
+
 // get cpanel account list
 $url = $whmUrl."/".$cpsess."/scripts4/listaccts?viewall=1&search=&searchtype=&acctp=30&sortrev=&sortorder=domain";
 curl_setopt($ch, CURLOPT_URL, $url);
 $out = curl_exec($ch);
+
+echo "3\n";
 
 // get cpanel username
 $html->load($out);
@@ -50,8 +57,12 @@ foreach($tdshade2 as $item) {
 
 sort($users);
 
+print_r($users);
+
 foreach($users as $user) {
         echo "backup user $user \n";
+
+        //echo "1\n";
 
         $i = 1;
 
@@ -88,10 +99,23 @@ foreach($users as $user) {
         $cpsess2 = $url[3];
         $theme = $url[5];
 
+        //echo "2\n";
+        //echo "$theme\n";
+
+        /*
+        $url = "$cPanelUrl/$cpsess2/frontend/$theme/index.html";
+        curl_setopt($ch, CURLOPT_URL, $url);
+        $out=curl_exec($ch);
+        file_put_contents($user.$i++,$out); // 3
+        */
+
         // backup
         $url = "$cPanelUrl/$cpsess2/frontend/$theme/backup/dofullbackup.html?dest=scp&server=$backupHost&user=$backupUser&pass=$backupPass&port=$backupPort&rdir=$backupPath&email=$backupMail&submit=Generate Backup";
         curl_setopt($ch, CURLOPT_URL, $url);
         $out=curl_exec($ch);
+
+        //echo $out;
+        //break;
         //file_put_contents($user.$i++,$out); // 4
 
         // sleep

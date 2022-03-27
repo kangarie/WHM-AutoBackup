@@ -11,7 +11,7 @@ $password = 'your-password';
 $baseURL  = 'https://your-whmURL-without-Port.com';
 $cPanelPort = 2083;
 
-// backup scp login
+// backup ftp login
 $backupHost = 'your-host';
 $backupUser = 'your-username';
 $backupPass = 'your-password';
